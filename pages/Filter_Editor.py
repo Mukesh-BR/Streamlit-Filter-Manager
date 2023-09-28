@@ -12,7 +12,10 @@ st.caption("This web page can be used to edit the filters we use on production")
 def get_data(filename):
     return pd.read_csv(filename)
 
-base_filename = "/Users/mukeshbr/alpharoc_interview/data_editor/data/"
+base_filename = "data/"
+archival_path= base_filename + "archives/filter_archives/"
+print(os.curdir)
+
 filters = os.listdir(base_filename)
 if "archives" in filters:
     filters.remove("archives")
@@ -34,7 +37,7 @@ def check_error(edited, meta_table):
             return True, "Question ID cannot be null"
         if filter_questions.isin(questions).all()==False:
             return True, "One or more question ids in edited filter does not exist in the meta table"
-        if filter_questions.nunique() == len(filter_questions) and (choice== "dev_nps_category_override.csv" or choice== "dev_nps_brand_override.csv"):
+        if (filter_questions.nunique() != len(filter_questions)) and (choice== "dev_nps_category_override.csv" or choice== "dev_nps_brand_override.csv"):
             return True, "Question ids must be unique"
     if "answerid" in edited.columns:
         filter_answers= edited.answerid
@@ -52,6 +55,10 @@ def check_error(edited, meta_table):
         print(edited.groupby(['questionid', 'answerid'])['alpharoc_order'].transform('nunique'))
         if edited.groupby(['questionid', 'answerid'])['alpharoc_order'].transform('nunique').gt(1).any():
             return True, "A question answer pair has more than one ordering"
+    
+    if "start_date" in edited.columns and "end_date" in edited.columns:
+        if ((pd.to_datetime(edited['start_date']) <= pd.to_datetime('today')) & (pd.to_datetime(edited['end_date']) <= pd.to_datetime('today')) & (pd.to_datetime(edited['start_date']) <= pd.to_datetime(edited['end_date']))).all() == False:
+            return True, "Start date must be before than end date and both should be before today"
         
     return False, None
 
@@ -78,7 +85,8 @@ if submit_button:
     formatted_string = dt_object.strftime("%Y-%m-%d %H:%M:%S")  
     split_filename = choice.split(".")[0]
     timestamped_filename = split_filename + '_' + str(formatted_string) + ".csv"
-    archived = base_filename + "archives/filter_archives/" + timestamped_filename
+    
+    archived = archival_path + timestamped_filename
     previous = get_data(base_filename+choice)
     test = edited.iloc[:, ~edited.columns.str.contains('Unnamed', case=False)]
     previous.to_csv(archived, index=False)
