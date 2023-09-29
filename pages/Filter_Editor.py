@@ -13,6 +13,9 @@ st.caption("This web page can be used to edit the filters we use on production")
 base_filename = "data/"
 archival_path= base_filename + "archives/filter_archives/"
 
+if not os.path.exists(archival_path):
+    os.makedirs(archival_path)
+
 # Get list of filters, we sort the list of filters to improve user experience
 filters = os.listdir(base_filename)
 filters.sort()
@@ -107,7 +110,7 @@ with st.form("data_editor_form"):
 if submit_button:
     has_error, message = sanity_checks(edited, meta_table)
     if has_error:
-        st.error('No updates performed! ' + message + " Page will automatically refresh in a few seconds", icon="🚨")
+        st.error('No updates performed! ' + message + ' Page will automatically refresh in a few seconds', icon="🚨")
         time.sleep(4)
         st.rerun()
     else:
@@ -117,9 +120,15 @@ if submit_button:
         
         # Read previous values in order to archive them
         previous = get_data(base_filename+choice)
-        edited_without_index = edited.iloc[:, ~edited.columns.str.contains('Unnamed', case=False)]
-        previous.to_csv(archived, index=False)
-        edited_without_index.to_csv(filename, index=False)
-        st.success('Updated Successfully! Page will automatically refresh in a few seconds', icon="✅")
-        time.sleep(2)
-        st.rerun()
+
+        if previous.equals(edited):
+            st.error('No updates performed as no edits found! Page will automatically refresh in a few seconds', icon="🚨")
+            time.sleep(4)
+            st.rerun()
+        
+        else:
+            previous.to_csv(archived, index=False)
+            edited.to_csv(filename, index=False)
+            st.success('Updated Successfully! Page will automatically refresh in a few seconds', icon="✅")
+            time.sleep(2)
+            st.rerun()
