@@ -10,7 +10,5 @@ st.write("")
 
 """ This table show a quick example of survey questions we have recorded along with the answers."""
 # df = pd.DataFrame(data)
-df =  pd.read_csv("/Users/mukeshbr/alpharoc_interview/data_editor/data/dev_meta.csv")
-
-
-annotated = st.dataframe(df, hide_index=True, use_container_width=True)
+df =  pd.read_csv("data/dev_meta.csv")
+st.dataframe(df, hide_index=True, use_container_width=True)
