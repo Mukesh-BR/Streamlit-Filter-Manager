@@ -13,8 +13,4 @@ st.write("")
 df =  pd.read_csv("/Users/mukeshbr/alpharoc_interview/data_editor/data/dev_meta.csv")
 
 
-annotated = st.data_editor(df, hide_index=True, use_container_width=True, disabled=["questionid", "answerid"])
-
-st.download_button(
-    "⬇️ Download meta dataset as .csv", annotated.to_csv(), "annotated.csv", use_container_width=True
-)
+annotated = st.dataframe(df, hide_index=True, use_container_width=True)
